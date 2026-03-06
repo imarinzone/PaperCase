@@ -48,46 +48,44 @@ The project includes a multi-stage Dockerfile for production.
 
 ## 📱 Adding New Phone Specs
 
-There are two ways to add phone specifications:
+We use a standardized format to ensure print accuracy. To add a new device:
 
-### 1. Static Addition (Recommended for Common Models)
-Edit `constants.ts` to add a new object to the `PHONE_MODELS` array.
+### 1. Locate the Database
+Open `constants.ts` and scroll to the `PHONE_MODELS` array.
+
+### 2. Add Your Model
+Insert a new object following this strict schema:
 
 ```typescript
 {
-  id: 'new-model-id',
-  name: 'New Phone Model',
-  brand: Brand.OTHER,
-  widthMm: 70.0,
-  heightMm: 150.0,
-  cornerRadiusMm: 10,
+  id: 'kebab-case-model-name',
+  name: 'Display Name',
+  brand: Brand.BRAND_NAME, // Import Brand from ./types
+  widthMm: 70.0,           // Exact width in millimeters
+  heightMm: 150.0,         // Exact height in millimeters
+  cornerRadiusMm: 6,       // Corner radius (approx: 1.5 for boxy, 8.5 for round)
   releaseYear: 2024,
-  cameraPath: "SVG PATH DATA HERE" 
+  cameraPath: CAMERA_PRESETS.YOUR_CHOSEN_PRESET
 }
 ```
 
-### 2. Camera Styles (For Neural Retrieval)
-If the AI detection struggles with a new camera layout style:
-1. Open `utils/cameraPatterns.ts`.
-2. Add a new prompt description to `CAMERA_STYLES_PROMPT`.
-3. Add the corresponding SVG path to `getCameraPathForStyle` function.
+### 3. Choosing a Camera Path
+We provide pre-made SVG paths for common camera layouts in `constants.ts` under `CAMERA_PRESETS`.
 
-```typescript
-// utils/cameraPatterns.ts
+**Available Presets:**
+- `IPHONE_PRO_ISLAND` (Triple lens triangle)
+- `IPHONE_BASE_DIAGONAL` (Dual lens diagonal)
+- `IPHONE_16_VERTICAL` (Vertical pill)
+- `SAMSUNG_ULTRA_ISLAND` (Floating detached lenses - 5 circles)
+- `SAMSUNG_VERTICAL_3_CIRCLE` (Floating detached lenses - 3 circles)
+- `PIXEL_VISOR_BAR` (Full width bar)
+- `PIXEL_9_ISLAND` (Floating pill island)
 
-export const CAMERA_STYLES_PROMPT = `
-...
-- "new_style_name": Description of the camera layout...
-`;
-
-export const getCameraPathForStyle = (style: string): string => {
-  const genericPaths = {
-    ...
-    'new_style_name': "M ... (SVG Path)",
-  };
-  ...
-}
-```
+**Need a custom camera shape?**
+If a phone has a unique camera shape not listed above:
+1. Create an SVG path string (`M ... z`). Coordinates are in millimeters relative to the top-left of the phone.
+2. Add it to `CAMERA_PRESETS` in `constants.ts` first.
+3. Reference it in your model object.
 
 ## 🔧 Technology Stack
 

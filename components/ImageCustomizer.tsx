@@ -13,6 +13,7 @@ import {
 interface Props {
   model: PhoneModel;
   onBack: () => void;
+  onDirtyChange: (isDirty: boolean) => void;
 }
 
 const INITIAL_STATE: EditState = {
@@ -32,12 +33,12 @@ const INITIAL_STATE: EditState = {
 
 type ToolTab = 'upload' | 'adjust' | 'transform' | 'text' | 'export';
 
-export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
+export const ImageCustomizer: React.FC<Props> = ({ model, onBack, onDirtyChange }) => {
   const [image, setImage] = useState<string | null>(null);
   const [editState, setEditState] = useState<EditState>(INITIAL_STATE);
   const [activeTab, setActiveTab] = useState<ToolTab>('upload');
   const [activeTextId, setActiveTextId] = useState<string | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(true); // For mobile toggle
+  const [isPanelOpen, setIsPanelOpen] = useState(true); 
   
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
@@ -49,6 +50,11 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
   const [isAiGenerating, setIsAiGenerating] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Notify parent of dirty state changes
+  useEffect(() => {
+    onDirtyChange(!!image);
+  }, [image, onDirtyChange]);
 
   // Auto-switch tab on image upload
   useEffect(() => {
@@ -250,60 +256,73 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
   const activeTextLayer = editState.textLayers.find(l => l.id === activeTextId);
 
   return (
-    <div className="flex flex-col-reverse md:flex-row h-[calc(100vh-64px)] bg-black overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-black overflow-hidden relative selection:bg-brand-500/30">
       
       {/* -------------------------------------------------------------
           SIDEBAR / BOTTOM SHEET (Tools & Panels)
          ------------------------------------------------------------- */}
-      <div className={`flex-shrink-0 flex flex-col-reverse md:flex-row w-full md:w-80 bg-zinc-900 border-t md:border-t-0 md:border-r border-white/5 z-20 shadow-2xl transition-all duration-300 ${isPanelOpen ? 'h-[50vh] md:h-full' : 'h-16 md:h-full'}`}>
+      <div 
+        className={`
+          flex-shrink-0 flex flex-col-reverse md:flex-row 
+          w-full md:w-80 bg-zinc-900 
+          border-t md:border-t-0 md:border-r border-white/5 
+          z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-2xl 
+          transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+          order-2 md:order-1
+          ${isPanelOpen ? 'h-[40vh] md:h-full' : 'h-16 md:h-full'}
+          ${!isPanelOpen && 'md:w-16'}
+        `}
+      >
         
         {/* ICON RAIL */}
-        <div className="w-full md:w-16 h-16 md:h-full flex flex-row md:flex-col items-center justify-around md:justify-start md:py-4 gap-0 md:gap-4 bg-zinc-950 border-t md:border-t-0 md:border-r border-white/5 shrink-0">
-          <button 
-            onClick={() => togglePanel('upload')}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'upload' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-            title="Uploads"
-          >
-            <ImageIcon size={20} />
-          </button>
-          
-          <button 
-            onClick={() => togglePanel('transform')}
-            disabled={!image}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'transform' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
-            title="Transform"
-          >
-            <Move size={20} />
-          </button>
+        <div className="w-full md:w-16 h-16 md:h-full flex flex-row md:flex-col items-center justify-between md:justify-start px-4 md:px-0 md:py-4 gap-0 md:gap-4 bg-zinc-950 border-t md:border-t-0 md:border-r border-white/5 shrink-0 z-40">
+          <div className="flex md:flex-col gap-1 md:gap-4 w-full justify-between md:justify-start">
+            <button 
+                onClick={() => togglePanel('upload')}
+                className={`p-3 rounded-xl transition-all ${activeTab === 'upload' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                title="Uploads"
+            >
+                <ImageIcon size={20} />
+            </button>
+            
+            <button 
+                onClick={() => togglePanel('transform')}
+                disabled={!image}
+                className={`p-3 rounded-xl transition-all ${activeTab === 'transform' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
+                title="Transform"
+            >
+                <Move size={20} />
+            </button>
 
-          <button 
-            onClick={() => togglePanel('adjust')}
-            disabled={!image}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'adjust' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
-            title="Adjustments"
-          >
-            <Sliders size={20} />
-          </button>
+            <button 
+                onClick={() => togglePanel('adjust')}
+                disabled={!image}
+                className={`p-3 rounded-xl transition-all ${activeTab === 'adjust' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
+                title="Adjustments"
+            >
+                <Sliders size={20} />
+            </button>
 
-          <button 
-            onClick={() => togglePanel('text')}
-            disabled={!image}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'text' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
-            title="Text"
-          >
-            <Type size={20} />
-          </button>
+            <button 
+                onClick={() => togglePanel('text')}
+                disabled={!image}
+                className={`p-3 rounded-xl transition-all ${activeTab === 'text' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
+                title="Text"
+            >
+                <Type size={20} />
+            </button>
 
-          <button 
-            onClick={() => togglePanel('export')}
-            disabled={!image}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'export' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
-            title="Export"
-          >
-            <Download size={20} />
-          </button>
+            <button 
+                onClick={() => togglePanel('export')}
+                disabled={!image}
+                className={`p-3 rounded-xl transition-all ${activeTab === 'export' && isPanelOpen ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/50' : 'text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30'}`}
+                title="Export"
+            >
+                <Download size={20} />
+            </button>
+          </div>
 
-          <div className="md:mt-auto md:mb-2 hidden md:block">
+          <div className="hidden md:block md:mt-auto md:mb-2">
             <button 
               onClick={onBack}
               className="p-3 rounded-xl text-zinc-500 hover:text-red-400 hover:bg-red-400/10 transition-all"
@@ -315,25 +334,27 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
         </div>
 
         {/* PANEL CONTENT */}
-        <div className={`flex-1 flex flex-col min-w-0 bg-zinc-900 w-full overflow-hidden ${!isPanelOpen ? 'hidden md:flex' : 'flex'}`}>
-          <div className="px-4 py-3 md:px-5 md:py-4 border-b border-white/5 flex justify-between items-center bg-zinc-900/95 sticky top-0 z-10 shrink-0 h-14">
+        <div className={`flex-1 flex flex-col min-w-0 bg-zinc-900 w-full overflow-hidden relative ${!isPanelOpen ? 'hidden md:flex' : 'flex'}`}>
+          <div className="px-4 py-2 md:px-5 md:py-4 border-b border-white/5 flex justify-between items-center bg-zinc-900/95 sticky top-0 z-10 shrink-0 h-10 md:h-14">
             <div>
-              <h2 className="text-base md:text-lg font-bold text-white capitalize">{activeTab}</h2>
+              <h2 className="text-sm md:text-lg font-bold text-white capitalize flex items-center gap-2">
+                {activeTab}
+              </h2>
             </div>
-            <button onClick={() => setIsPanelOpen(false)} className="md:hidden text-zinc-500 p-2">
+            <button onClick={() => setIsPanelOpen(false)} className="md:hidden text-zinc-500 p-2 active:text-white">
                <ChevronDown size={20} />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 md:px-5 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-4 py-4 md:px-5 space-y-5 custom-scrollbar overscroll-contain pb-8 md:pb-4">
             
             {/* --- UPLOAD PANEL --- */}
             {activeTab === 'upload' && (
               <div className="space-y-4 animate-fade-in">
-                <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-white/20 rounded-xl hover:border-brand-500 hover:bg-brand-500/5 transition-all cursor-pointer group bg-zinc-900">
+                <label className="flex flex-col items-center justify-center w-full h-20 md:h-24 border border-dashed border-white/20 rounded-xl hover:border-brand-500 hover:bg-brand-500/5 transition-all cursor-pointer group bg-zinc-900 active:scale-95 duration-100">
                   <div className="flex items-center gap-3">
                     <Upload className="w-5 h-5 text-zinc-500 group-hover:text-brand-400 transition-colors" />
-                    <p className="text-xs text-zinc-400 group-hover:text-white">Upload Image</p>
+                    <p className="text-xs text-zinc-400 group-hover:text-white font-medium">Upload Image</p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </label>
@@ -353,7 +374,7 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                         <button 
                             onClick={handleAiGeneration}
                             disabled={isAiGenerating || !aiPrompt.trim()}
-                            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95"
                         >
                             {isAiGenerating ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
                             Generate
@@ -364,7 +385,7 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                 <div>
                   <h3 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">Presets</h3>
                   <div className="grid grid-cols-4 md:grid-cols-3 gap-2">
-                    {DEFAULT_PATTERNS.slice(0, 6).map((url, i) => (
+                    {DEFAULT_PATTERNS.slice(0, 8).map((url, i) => (
                       <button 
                         key={i}
                         onClick={() => {
@@ -372,9 +393,9 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                           setEditState({ ...INITIAL_STATE, textLayers: [] });
                           setActiveTab('transform');
                         }}
-                        className="aspect-square rounded-md overflow-hidden border border-white/5 hover:border-brand-500 transition-all group relative"
+                        className="aspect-square rounded-md overflow-hidden border border-white/5 hover:border-brand-500 transition-all group relative active:scale-90"
                       >
-                        <img src={url} alt="Preset" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        <img src={url} alt="Preset" className="w-full h-full object-cover" />
                       </button>
                     ))}
                   </div>
@@ -384,40 +405,40 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
 
             {/* --- TRANSFORM PANEL --- */}
             {activeTab === 'transform' && image && (
-              <div className="space-y-5 animate-fade-in">
+              <div className="space-y-6 animate-fade-in">
                 
                 {/* Scale */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs text-zinc-400 flex items-center gap-2"><ZoomIn size={12}/> Scale</label>
-                    <span className="text-[10px] font-mono text-zinc-500">{Math.round(editState.scale * 100)}%</span>
+                    <label className="text-xs text-zinc-400 flex items-center gap-2 font-medium"><ZoomIn size={14}/> Scale</label>
+                    <span className="text-[10px] font-mono text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded">{Math.round(editState.scale * 100)}%</span>
                   </div>
                   <input 
                     type="range" min="0.1" max="3" step="0.01" 
                     value={editState.scale}
                     onChange={(e) => setEditState({...editState, scale: parseFloat(e.target.value)})}
-                    className="w-full accent-brand-500 bg-white/10 h-1 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-brand-500 bg-white/10 h-2 rounded-lg appearance-none cursor-pointer touch-none"
                   />
                 </div>
 
                 {/* Rotation */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs text-zinc-400 flex items-center gap-2"><RotateCcw size={12}/> Rotate</label>
-                    <span className="text-[10px] font-mono text-zinc-500">{editState.rotation}°</span>
+                    <label className="text-xs text-zinc-400 flex items-center gap-2 font-medium"><RotateCcw size={14}/> Rotate</label>
+                    <span className="text-[10px] font-mono text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded">{editState.rotation}°</span>
                   </div>
                   <input 
                     type="range" min="0" max="360" step="1" 
                     value={editState.rotation}
                     onChange={(e) => setEditState({...editState, rotation: parseInt(e.target.value)})}
-                    className="w-full accent-brand-500 bg-white/10 h-1 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-brand-500 bg-white/10 h-2 rounded-lg appearance-none cursor-pointer touch-none"
                   />
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     {[0, 90, 180, 270].map(deg => (
                       <button 
                         key={deg}
                         onClick={() => setEditState({...editState, rotation: deg})}
-                        className="flex-1 py-1.5 text-[10px] bg-white/5 hover:bg-white/10 rounded border border-white/5 text-zinc-400"
+                        className="flex-1 py-2 text-[10px] bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-zinc-400 active:bg-white/20 transition-colors"
                       >
                         {deg}°
                       </button>
@@ -426,22 +447,22 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                 </div>
 
                 {/* Flip */}
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button 
                       onClick={() => setEditState(s => ({...s, flipX: !s.flipX}))}
-                      className={`flex-1 py-2 flex items-center justify-center gap-1.5 rounded-lg border transition-all ${editState.flipX ? 'bg-brand-500/20 border-brand-500 text-brand-400' : 'bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10'}`}
+                      className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-lg border transition-all active:scale-95 ${editState.flipX ? 'bg-brand-500/20 border-brand-500 text-brand-400' : 'bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10'}`}
                     >
-                      <FlipHorizontal size={14} /> <span className="text-[10px]">Flip X</span>
+                      <FlipHorizontal size={16} /> <span className="text-xs">Flip X</span>
                     </button>
                     <button 
                       onClick={() => setEditState(s => ({...s, flipY: !s.flipY}))}
-                      className={`flex-1 py-2 flex items-center justify-center gap-1.5 rounded-lg border transition-all ${editState.flipY ? 'bg-brand-500/20 border-brand-500 text-brand-400' : 'bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10'}`}
+                      className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-lg border transition-all active:scale-95 ${editState.flipY ? 'bg-brand-500/20 border-brand-500 text-brand-400' : 'bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10'}`}
                     >
-                      <FlipVertical size={14} /> <span className="text-[10px]">Flip Y</span>
+                      <FlipVertical size={16} /> <span className="text-xs">Flip Y</span>
                     </button>
                 </div>
 
-                <button onClick={resetTransforms} className="w-full py-2.5 text-xs text-zinc-500 hover:text-white flex items-center justify-center gap-2 border border-dashed border-zinc-700 rounded-lg">
+                <button onClick={resetTransforms} className="w-full py-3 text-xs text-zinc-500 hover:text-white flex items-center justify-center gap-2 border border-dashed border-zinc-700 rounded-lg active:bg-white/5">
                   <RefreshCw size={12} /> Reset All
                 </button>
               </div>
@@ -449,7 +470,7 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
 
             {/* --- ADJUST PANEL --- */}
             {activeTab === 'adjust' && image && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-6 animate-fade-in">
                 {[
                   { label: 'Brightness', icon: Sun, key: 'brightness' as keyof EditState, min: 0, max: 200 },
                   { label: 'Contrast', icon: Contrast, key: 'contrast' as keyof EditState, min: 0, max: 200 },
@@ -457,22 +478,22 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                   { label: 'Blur', icon: Aperture, key: 'blur' as keyof EditState, min: 0, max: 10 },
                   { label: 'Grayscale', icon: EyeOff, key: 'grayscale' as keyof EditState, min: 0, max: 100 },
                 ].map((control) => (
-                  <div key={control.key} className="space-y-1.5">
+                  <div key={control.key} className="space-y-2">
                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-medium text-zinc-400 flex items-center gap-1.5">
-                          <control.icon size={10} /> {control.label}
+                        <label className="text-[10px] font-medium text-zinc-400 flex items-center gap-1.5 uppercase tracking-wide">
+                          <control.icon size={12} /> {control.label}
                         </label>
-                        <span className="text-[10px] font-mono text-zinc-500">{Math.round(editState[control.key] as number)}</span>
+                        <span className="text-[10px] font-mono text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded">{Math.round(editState[control.key] as number)}</span>
                       </div>
                       <input 
                         type="range" min={control.min} max={control.max} 
                         value={editState[control.key] as number}
                         onChange={(e) => setEditState({...editState, [control.key]: parseFloat(e.target.value)})}
-                        className="w-full accent-brand-500 bg-white/10 h-1 rounded-lg appearance-none cursor-pointer"
+                        className="w-full accent-brand-500 bg-white/10 h-2 rounded-lg appearance-none cursor-pointer touch-none"
                       />
                   </div>
                 ))}
-                <button onClick={resetAdjustments} className="w-full py-2.5 text-xs text-zinc-500 hover:text-white flex items-center justify-center gap-2 border border-dashed border-zinc-700 rounded-lg mt-2">
+                <button onClick={resetAdjustments} className="w-full py-3 text-xs text-zinc-500 hover:text-white flex items-center justify-center gap-2 border border-dashed border-zinc-700 rounded-lg mt-4 active:bg-white/5">
                   <RefreshCw size={12} /> Reset All
                 </button>
               </div>
@@ -480,40 +501,40 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
 
             {/* --- TEXT PANEL --- */}
             {activeTab === 'text' && image && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-5 animate-fade-in">
                 
                 <button 
                   onClick={addTextLayer}
-                  className="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg shadow-brand-900/50 transition-all text-sm"
+                  className="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg shadow-brand-900/50 transition-all text-sm active:scale-95"
                 >
-                  <Plus size={16} /> Add Text
+                  <Plus size={18} /> Add Text Layer
                 </button>
 
                 {activeTextLayer ? (
-                  <div className="space-y-3 bg-white/5 p-3 rounded-xl border border-white/5">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-[10px] font-bold text-zinc-400 uppercase">Properties</h3>
-                      <button onClick={deleteActiveText} className="text-red-400 hover:text-red-300 transition-colors">
-                        <Trash2 size={14} />
+                  <div className="space-y-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                    <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                      <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Layer Properties</h3>
+                      <button onClick={deleteActiveText} className="text-red-400 hover:text-red-300 transition-colors p-1.5 rounded hover:bg-red-500/10">
+                        <Trash2 size={16} />
                       </button>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <input 
                         type="text" 
                         value={activeTextLayer.text}
                         onChange={(e) => updateActiveText('text', e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 placeholder-zinc-600"
                         placeholder="Enter text..."
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 gap-2">
                          {FONTS.map(font => (
                            <button
                             key={font.name}
                             onClick={() => updateActiveText('fontFamily', font.family)}
-                            className={`py-1.5 text-[10px] rounded border transition-all ${activeTextLayer.fontFamily === font.family ? 'bg-brand-500 text-white border-brand-500' : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10'}`}
+                            className={`py-2 text-[10px] rounded-lg border transition-all ${activeTextLayer.fontFamily === font.family ? 'bg-brand-500 text-white border-brand-500' : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10'}`}
                             style={{ fontFamily: font.family }}
                            >
                              {font.name}
@@ -521,30 +542,32 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                          ))}
                     </div>
 
-                    <div className="flex gap-3 pt-1">
-                      <div className="space-y-1">
-                        <label className="text-[10px] text-zinc-500">Color</label>
-                        <input 
-                          type="color" 
-                          value={activeTextLayer.color}
-                          onChange={(e) => updateActiveText('color', e.target.value)}
-                          className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
-                        />
+                    <div className="flex gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-500 block">Color</label>
+                        <div className="relative overflow-hidden w-10 h-10 rounded-lg border border-white/20">
+                            <input 
+                              type="color" 
+                              value={activeTextLayer.color}
+                              onChange={(e) => updateActiveText('color', e.target.value)}
+                              className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0 m-0"
+                            />
+                        </div>
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <label className="text-[10px] text-zinc-500">Size</label>
+                      <div className="flex-1 space-y-2">
+                        <label className="text-[10px] text-zinc-500 block">Size</label>
                         <input 
                           type="range" min="5" max="50" 
                           value={activeTextLayer.fontSize}
                           onChange={(e) => updateActiveText('fontSize', parseInt(e.target.value))}
-                          className="w-full accent-brand-500 h-1 bg-white/10 rounded-lg appearance-none mt-3"
+                          className="w-full accent-brand-500 h-2 bg-white/10 rounded-lg appearance-none touch-none mt-2"
                         />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-zinc-500 text-xs">
-                    {editState.textLayers.length > 0 ? 'Select a text layer to edit' : 'Tap above to add text'}
+                  <div className="text-center py-8 text-zinc-500 text-xs border border-dashed border-white/5 rounded-xl">
+                    {editState.textLayers.length > 0 ? 'Select a text layer on the canvas to edit' : 'No text layers yet'}
                   </div>
                 )}
               </div>
@@ -552,18 +575,18 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
             
             {/* --- EXPORT PANEL (UPDATED) --- */}
             {activeTab === 'export' && image && (
-               <div className="flex flex-col h-full justify-center space-y-4 animate-fade-in pb-10">
-                  <div className="text-center">
-                     <h3 className="text-base font-bold text-white mb-0.5">Print Template</h3>
-                     <p className="text-[10px] text-zinc-500">
-                         High-res PDF for {model.name}
+               <div className="flex flex-col h-full justify-center space-y-5 animate-fade-in pb-10">
+                  <div className="text-center px-4">
+                     <h3 className="text-lg font-bold text-white mb-1">Print Template</h3>
+                     <p className="text-xs text-zinc-500">
+                         Generates a high-resolution PDF for {model.name}
                      </p>
                   </div>
 
                   <button
                     onClick={handleDownload}
                     disabled={isGenerating}
-                    className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                    className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
                         isGenerating 
                         ? 'bg-zinc-800 text-zinc-500' 
                         : 'bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500 text-white shadow-lg shadow-brand-900/50'
@@ -571,18 +594,18 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
                   >
                     {isGenerating ? (
                         <>
-                            <Loader2 size={18} className="animate-spin" /> Rendering...
+                            <Loader2 size={20} className="animate-spin" /> Rendering PDF...
                         </>
                     ) : (
                         <>
-                            <Download size={18} /> Download PDF
+                            <Download size={20} /> Download PDF
                         </>
                     )}
                   </button>
                  
-                 <div className="p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg text-[10px] text-yellow-200/60 text-center leading-relaxed">
-                     <span className="font-bold text-yellow-500/80 mr-1">Note:</span>
-                     Print at 100% scale (Do not "Fit to Page")
+                 <div className="mx-2 p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg text-xs text-yellow-200/60 text-center leading-relaxed">
+                     <span className="font-bold text-yellow-500/80 mr-1 block mb-1">⚠️ Important:</span>
+                     Ensure your printer scaling is set to 100% or "Actual Size". Do not use "Fit to Page".
                  </div>
                </div>
             )}
@@ -594,16 +617,16 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
           WORKSPACE (Canvas)
          ------------------------------------------------------------- */}
       <div 
-        className="flex-1 relative bg-black flex items-center justify-center p-6 md:p-8 overflow-hidden" 
-        style={{ touchAction: 'none' }} // Critical for dragging
+        className="order-1 md:order-2 flex-1 min-h-0 relative bg-black flex items-center justify-center p-4 md:p-8 overflow-hidden w-full" 
+        style={{ touchAction: 'none' }} 
       >
         {/* Mobile Top Bar (Back button) */}
         <div className="md:hidden absolute top-4 left-4 z-40">
            <button 
               onClick={onBack}
-              className="p-2 rounded-full bg-zinc-900/80 text-white border border-white/10 backdrop-blur"
+              className="p-3 rounded-full bg-zinc-900/80 text-white border border-white/10 backdrop-blur shadow-lg active:scale-95 transition-transform"
            >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={20} />
            </button>
         </div>
 
@@ -614,96 +637,121 @@ export const ImageCustomizer: React.FC<Props> = ({ model, onBack }) => {
         />
         
         {/* Workspace Info */}
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-4 z-30">
-           <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur rounded-full border border-white/5 text-[10px] md:text-xs text-zinc-400">
-             {model.name}
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-4 z-30 pointer-events-none">
+           <div className="px-3 py-1.5 bg-zinc-900/80 backdrop-blur rounded-full border border-white/5 text-[10px] md:text-xs text-zinc-400 font-mono shadow-xl">
+             {model.name} • {Math.round(model.widthMm)}x{Math.round(model.heightMm)}mm
            </div>
         </div>
 
         {!image && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 text-zinc-800 p-4 text-center">
-             <div className="text-5xl md:text-8xl font-black opacity-20 tracking-tighter">CREATE</div>
-             <p className="opacity-40 font-mono mt-4 text-sm">Tap Upload to start</p>
+             <div className="text-5xl md:text-8xl font-black opacity-20 tracking-tighter select-none">CREATE</div>
+             <p className="opacity-40 font-mono mt-4 text-sm">Select 'Upload' to begin</p>
           </div>
         )}
 
-        {/* PHONE CANVAS */}
-        <div 
-          className="relative shadow-2xl transition-all duration-300 ease-out z-10 ring-1 ring-white/10"
-          style={{
-            aspectRatio: `${model.widthMm} / ${model.heightMm}`,
-            height: 'min(70vh, 700px)', // Allow more height on mobile vs previous 85vh which might overlap
-            maxHeight: isPanelOpen ? '50vh' : '70vh', // Shrink canvas when panel is open on mobile
-            borderRadius: `${model.cornerRadiusMm}mm`,
-          }}
-        >
-          {/* Mask & Interactive Area */}
-          <div 
-            ref={containerRef}
-            className={`w-full h-full relative overflow-hidden bg-zinc-900 ${image ? (isDraggingImage ? 'cursor-grabbing' : 'cursor-move') : ''}`}
-            style={{ borderRadius: 'inherit' }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleMouseDown}
-            onTouchMove={handleMouseMove}
-            onTouchEnd={handleMouseUp}
+        {/* PHONE CANVAS WRAPPER */}
+        <div className="relative z-10 w-full h-full flex items-center justify-center">
+          
+          {/* Strut SVG - Ensures aspect ratio and fitting within parent */}
+          <svg 
+             viewBox={`0 0 ${model.widthMm} ${model.heightMm}`} 
+             className="opacity-0 pointer-events-none block" 
+             style={{ 
+               maxHeight: isPanelOpen && window.innerWidth < 768 ? '50vh' : '100%', 
+               maxWidth: '100%', 
+               height: 'auto', 
+               width: 'auto',
+               display: 'block'
+             }}
+             aria-hidden="true"
           >
-            {image && (
-              <img 
-                src={image}
-                alt="Design"
-                draggable={false}
-                className="absolute origin-center max-w-none select-none"
-                style={{
-                  top: '50%',
-                  left: '50%',
-                  width: `${editState.scale * 100}%`,
-                  transform: `
-                    translate(-50%, -50%) 
-                    translate(${editState.translateX}%, ${editState.translateY}%) 
-                    rotate(${editState.rotation}deg)
-                    scaleX(${editState.flipX ? -1 : 1})
-                    scaleY(${editState.flipY ? -1 : 1})
-                  `,
-                  filter: previewFilter
-                }}
-              />
-            )}
-            
-            {/* Text Layers */}
-            {editState.textLayers.map(layer => (
-              <div
-                key={layer.id}
-                onMouseDown={(e) => handleTextMouseDown(e, layer.id)}
-                onTouchStart={(e) => handleTextMouseDown(e, layer.id)}
-                className={`absolute select-none whitespace-nowrap cursor-move ${activeTextId === layer.id ? 'ring-2 ring-brand-500 ring-offset-2 ring-offset-black/20' : ''}`}
-                style={{
-                  left: `${layer.x}%`,
-                  top: `${layer.y}%`,
-                  transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
-                  fontFamily: layer.fontFamily,
-                  fontSize: `${(layer.fontSize / 100) * (containerRef.current?.offsetWidth || 0)}px`, 
-                  color: layer.color,
-                  zIndex: 25,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }}
-              >
-                {layer.text}
-              </div>
-            ))}
-            
-            {/* Camera Overlay */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-20">
-               <svg viewBox={`0 0 ${model.widthMm} ${model.heightMm}`} className="w-full h-full" preserveAspectRatio="none">
-                 <path d={model.cameraPath} fill="rgba(0,0,0,0.85)" />
-                 <path d={model.cameraPath} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
-               </svg>
-            </div>
+             <rect width={model.widthMm} height={model.heightMm} />
+          </svg>
 
-            {/* Gloss */}
-            <div className="absolute inset-0 pointer-events-none z-30 opacity-50 bg-gradient-to-tr from-white/10 via-transparent to-transparent" />
+          {/* Actual Content - Absolute positioned over the strut */}
+          <div 
+            className="absolute shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] ring-1 ring-white/10 bg-zinc-900"
+            style={{
+              borderRadius: `${model.cornerRadiusMm}mm`,
+              // We match the svg visual size by positioning absolutely centered,
+              // but we rely on the parent container (which shrinks to fit the svg) to handle size.
+              // Actually, since the svg expands the parent container to the correct aspect ratio,
+              // we can just fill that container.
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              height: '100%', // This will be 100% of the SVG's height
+              aspectRatio: `${model.widthMm} / ${model.heightMm}`
+            }}
+          >
+            {/* Mask & Interactive Area */}
+            <div 
+              ref={containerRef}
+              className={`w-full h-full relative overflow-hidden ${image ? (isDraggingImage ? 'cursor-grabbing' : 'cursor-move') : ''}`}
+              style={{ borderRadius: 'inherit' }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleMouseUp}
+            >
+              {image && (
+                <img 
+                  src={image}
+                  alt="Design"
+                  draggable={false}
+                  className="absolute origin-center max-w-none select-none"
+                  style={{
+                    top: '50%',
+                    left: '50%',
+                    width: `${editState.scale * 100}%`,
+                    transform: `
+                      translate(-50%, -50%) 
+                      translate(${editState.translateX}%, ${editState.translateY}%) 
+                      rotate(${editState.rotation}deg)
+                      scaleX(${editState.flipX ? -1 : 1})
+                      scaleY(${editState.flipY ? -1 : 1})
+                    `,
+                    filter: previewFilter
+                  }}
+                />
+              )}
+              
+              {editState.textLayers.map(layer => (
+                <div
+                  key={layer.id}
+                  onMouseDown={(e) => handleTextMouseDown(e, layer.id)}
+                  onTouchStart={(e) => handleTextMouseDown(e, layer.id)}
+                  className={`absolute select-none whitespace-nowrap cursor-move ${activeTextId === layer.id ? 'ring-2 ring-brand-500 ring-offset-2 ring-offset-black/20' : ''}`}
+                  style={{
+                    left: `${layer.x}%`,
+                    top: `${layer.y}%`,
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                    fontFamily: layer.fontFamily,
+                    fontSize: `${(layer.fontSize / 100) * (containerRef.current?.offsetWidth || 0)}px`, 
+                    color: layer.color,
+                    zIndex: 25,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  {layer.text}
+                </div>
+              ))}
+              
+              {/* Camera Overlay */}
+              <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-20">
+                <svg viewBox={`0 0 ${model.widthMm} ${model.heightMm}`} className="w-full h-full" preserveAspectRatio="none">
+                  <path d={model.cameraPath} fill="rgba(0,0,0,0.85)" />
+                  <path d={model.cameraPath} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+                </svg>
+              </div>
+
+              {/* Gloss */}
+              <div className="absolute inset-0 pointer-events-none z-30 opacity-50 bg-gradient-to-tr from-white/10 via-transparent to-transparent" />
+            </div>
           </div>
         </div>
       </div>

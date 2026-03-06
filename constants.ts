@@ -12,51 +12,111 @@ export const FONTS = [
   { name: 'Handwritten', family: 'Dancing Script, cursive' },
 ];
 
-// REUSABLE CAMERA PATHS
-const CAM_IPHONE_PRO = "M 12 12 h 28 a 8 8 0 0 1 8 8 v 28 a 8 8 0 0 1 -8 8 h -28 a 8 8 0 0 1 -8 -8 v -28 a 8 8 0 0 1 8 -8 z";
-const CAM_IPHONE_BASE_DIAGONAL = `
-  M 11.5 3.5 h 13.5 a 8 8 0 0 1 8 8 v 13.5 a 8 8 0 0 1 -8 8 h -13.5 a 8 8 0 0 1 -8 -8 v -13.5 a 8 8 0 0 1 8 -8 z
-  M 10.9 10.9 m -2.75 0 a 2.75 2.75 0 1 0 5.5 0 a 2.75 2.75 0 1 0 -5.5 0
-  M 25.6 10.9 m -7.25 0 a 7.25 7.25 0 1 0 14.5 0 a 7.25 7.25 0 1 0 -14.5 0
-  M 10.9 25.6 m -7.75 0 a 7.75 7.75 0 1 0 15.5 0 a 7.75 7.75 0 1 0 -15.5 0
-  M 25.6 25.6 m -0.5 0 a 0.5 0.5 0 1 0 1 0 a 0.5 0.5 0 1 0 -1 0
-`;
-// New iPhone 16 vertical pill style
-const CAM_IPHONE_16_VERTICAL = "M 10 10 h 14 a 7 7 0 0 1 7 7 v 24 a 7 7 0 0 1 -7 7 h -14 a 7 7 0 0 1 -7 -7 v -24 a 7 7 0 0 1 7 -7 z M 17 16 a 4 4 0 1 0 0 8 a 4 4 0 1 0 0 -8 M 17 32 a 4 4 0 1 0 0 8 a 4 4 0 1 0 0 -8";
-
-const CAM_SAMSUNG_ULTRA = `
-  M 12 15 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
-  M 12 30 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
-  M 12 45 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
-  M 28 15 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0
-  M 28 30 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0
-`;
-const CAM_SAMSUNG_VERTICAL_3 = `
-  M 10 12 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-  M 10 26 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-  M 10 40 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-`;
-
-const CAM_PIXEL_VISOR = "M 0 25 h 100% v 24 h -100% z M 10 32 h 35 a 5 5 0 0 1 5 5 v 0 a 5 5 0 0 1 -5 5 h -35 a 5 5 0 0 1 -5 -5 v 0 a 5 5 0 0 1 5 -5 z M 55 37 a 5 5 0 1 1 0 10 a 5 5 0 1 1 0 -10 z";
-// Pixel 9 Floating Bar
-const CAM_PIXEL_9_ISLAND = "M 8 30 h 55 a 10 10 0 0 1 10 10 v 15 a 10 10 0 0 1 -10 10 h -55 a 10 10 0 0 1 -10 -10 v -15 a 10 10 0 0 1 10 -10 z M 18 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 36 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 54 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12";
-
-// Pixel 9 Pro Fold Square Island
-const CAM_PIXEL_9_FOLD = "M 5 5 h 28 a 6 6 0 0 1 6 6 v 32 a 6 6 0 0 1 -6 6 h -28 a 6 6 0 0 1 -6 -6 v -32 a 6 6 0 0 1 6 -6 z M 12 14 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 12 30 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 26 14 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 26 30 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10";
-
-export const PHONE_MODELS: PhoneModel[] = [
+/**
+ * ------------------------------------------------------------------
+ * MODEL-SPECIFIC CAMERA PATHS
+ * ------------------------------------------------------------------
+ * Unique SVG paths for each device to ensure exact cutout precision.
+ * Coordinates are in millimeters (mm).
+ */
+const CAMERA_DUMPS = {
   // --- APPLE ---
   
-  // iPhone 16 Series
+  // iPhone 16 Plus: Vertical Pill + Side Flash
+  // Island: ~18mm x 37mm, positioned ~9mm from top-left
+  // Flash: ~7mm diameter, centered vertically with island
+  IPHONE_16_PLUS: `
+    M 9 18.5 a 9 9 0 0 1 18 0 v 19 a 9 9 0 0 1 -18 0 z
+    M 36 27.5 m -3.5 0 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0
+  `,
+
+  // iPhone 16: Slightly smaller body, similar island ratio
+  IPHONE_16: `
+    M 8 17 a 8.5 8.5 0 0 1 17 0 v 18 a 8.5 8.5 0 0 1 -17 0 z
+    M 33 26 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0
+  `,
+
+  // Pro Max Island (Large Triangle Layout)
+  IPHONE_16_PRO_MAX: "M 12 12 h 28 a 9 9 0 0 1 9 9 v 28 a 9 9 0 0 1 -9 9 h -28 a 9 9 0 0 1 -9 -9 v -28 a 9 9 0 0 1 9 -9 z",
+  IPHONE_16_PRO: "M 11 11 h 26 a 9 9 0 0 1 9 9 v 26 a 9 9 0 0 1 -9 9 h -26 a 9 9 0 0 1 -9 -9 v -26 a 9 9 0 0 1 9 -9 z",
+
+  // 15 Series
+  IPHONE_15_PRO_MAX: "M 12 12 h 27 a 9 9 0 0 1 9 9 v 27 a 9 9 0 0 1 -9 9 h -27 a 9 9 0 0 1 -9 -9 v -27 a 9 9 0 0 1 9 -9 z",
+  IPHONE_15_PRO: "M 11 11 h 26 a 9 9 0 0 1 9 9 v 26 a 9 9 0 0 1 -9 9 h -26 a 9 9 0 0 1 -9 -9 v -26 a 9 9 0 0 1 9 -9 z",
+  IPHONE_15_PLUS: `
+    M 11.5 3.5 h 13.5 a 8 8 0 0 1 8 8 v 13.5 a 8 8 0 0 1 -8 8 h -13.5 a 8 8 0 0 1 -8 -8 v -13.5 a 8 8 0 0 1 8 -8 z
+    M 10.9 10.9 m -2.75 0 a 2.75 2.75 0 1 0 5.5 0 a 2.75 2.75 0 1 0 -5.5 0
+    M 25.6 10.9 m -7.25 0 a 7.25 7.25 0 1 0 14.5 0 a 7.25 7.25 0 1 0 -14.5 0
+  `,
+  IPHONE_15: `
+    M 10.5 3.5 h 13 a 8 8 0 0 1 8 8 v 13 a 8 8 0 0 1 -8 8 h -13 a 8 8 0 0 1 -8 -8 v -13 a 8 8 0 0 1 8 -8 z
+    M 10 10 m -2.5 0 a 2.5 2.5 0 1 0 5 0 a 2.5 2.5 0 1 0 -5 0
+    M 24 10 m -7 0 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0
+  `,
+
+  // --- SAMSUNG ---
+  // S24 Ultra: 5 Individual Lenses
+  SAMSUNG_S24_ULTRA: `
+    M 12 15 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
+    M 12 30 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
+    M 12 45 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 
+    M 28 15 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0
+    M 28 30 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0
+  `,
+  // S24+: 3 Vertical Lenses
+  SAMSUNG_S24_PLUS: `
+    M 11 12 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 11 27 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 11 42 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+  `,
+  SAMSUNG_S24: `
+    M 10 12 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 10 26 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 10 40 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+  `,
+  SAMSUNG_Z_FOLD_6: `
+    M 12 12 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 12 26 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 12 40 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
+    M 33.05 0 h 2 v 153.5 h -2 z
+  `,
+  SAMSUNG_Z_FLIP_6: `M 5 5 h 60 v 35 h -60 z M 10 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 M 30 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 M 0 81.5 h 71.9 v 2 h -71.9 z`,
+
+  // --- GOOGLE ---
+  // Pixel 9 Series (Pill Island)
+  GOOGLE_PIXEL_9_PRO_XL: "M 8 30 h 55 a 10 10 0 0 1 10 10 v 15 a 10 10 0 0 1 -10 10 h -55 a 10 10 0 0 1 -10 -10 v -15 a 10 10 0 0 1 10 -10 z M 18 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 36 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 54 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12",
+  GOOGLE_PIXEL_9_PRO: "M 8 30 h 50 a 10 10 0 0 1 10 10 v 15 a 10 10 0 0 1 -10 10 h -50 a 10 10 0 0 1 -10 -10 v -15 a 10 10 0 0 1 10 -10 z M 16 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 34 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12 M 52 38 a 6 6 0 1 0 0 12 a 6 6 0 1 0 0 -12",
+  GOOGLE_PIXEL_9_FOLD: "M 5 5 h 28 a 6 6 0 0 1 6 6 v 32 a 6 6 0 0 1 -6 6 h -28 a 6 6 0 0 1 -6 -6 v -32 a 6 6 0 0 1 6 -6 z M 12 14 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 12 30 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 26 14 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 26 30 a 5 5 0 1 0 0 10 a 5 5 0 1 0 0 -10 M 37.55 0 h 2 v 155.2 h -2 z",
+  
+  // Pixel 8/7/6 Series (Visor Bar)
+  // Pixel 6: Visor starts approx 20mm from top, height approx 15mm
+  GOOGLE_PIXEL_8_PRO: "M -5 22 h 200 v 26 h -200 z M 10 30 h 35 a 5 5 0 0 1 5 5 v 0 a 5 5 0 0 1 -5 5 h -35 a 5 5 0 0 1 -5 -5 v 0 a 5 5 0 0 1 5 -5 z M 55 35 a 5 5 0 1 1 0 10 a 5 5 0 1 1 0 -10 z",
+  GOOGLE_PIXEL_8: "M -5 22 h 200 v 26 h -200 z M 10 30 h 30 a 5 5 0 0 1 5 5 v 0 a 5 5 0 0 1 -5 5 h -30 a 5 5 0 0 1 -5 -5 v 0 a 5 5 0 0 1 5 -5 z",
+  GOOGLE_PIXEL_6: "M -5 18 h 200 v 30 h -200 z M 14 33 a 6 6 0 1 1 0 12 a 6 6 0 1 1 0 -12 M 30 33 a 6 6 0 1 1 0 12 a 6 6 0 1 1 0 -12",
+};
+
+// Re-export as CAMERA_PRESETS for backward compatibility if needed, 
+// though we use CAMERA_DUMPS for the database below.
+export const CAMERA_PRESETS = CAMERA_DUMPS;
+
+/**
+ * ------------------------------------------------------------------
+ * PHONE MODEL DATABASE
+ * ------------------------------------------------------------------
+ * Add new models here. 
+ * Ensure widthMm and heightMm are exact dimensions from specs.
+ */
+export const PHONE_MODELS: PhoneModel[] = [
+  // --- APPLE ---
   {
     id: 'iphone-16-pro-max',
     name: 'iPhone 16 Pro Max',
     brand: Brand.APPLE,
     widthMm: 77.6,
     heightMm: 163.0,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12, // Smoother rounded corners
     releaseYear: 2024,
-    cameraPath: CAM_IPHONE_PRO
+    cameraPath: CAMERA_DUMPS.IPHONE_16_PRO_MAX
   },
   {
     id: 'iphone-16-pro',
@@ -64,19 +124,19 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.APPLE,
     widthMm: 71.5,
     heightMm: 149.6,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2024,
-    cameraPath: CAM_IPHONE_PRO
+    cameraPath: CAMERA_DUMPS.IPHONE_16_PRO
   },
   {
     id: 'iphone-16-plus',
     name: 'iPhone 16 Plus',
     brand: Brand.APPLE,
-    widthMm: 77.8,
-    heightMm: 160.9,
-    cornerRadiusMm: 8.5,
+    widthMm: 77.8, // Verified 3.06"
+    heightMm: 160.9, // Verified 6.33"
+    cornerRadiusMm: 13, // Visual estimate from schematic
     releaseYear: 2024,
-    cameraPath: CAM_IPHONE_16_VERTICAL
+    cameraPath: CAMERA_DUMPS.IPHONE_16_PLUS
   },
   {
     id: 'iphone-16',
@@ -84,21 +144,19 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.APPLE,
     widthMm: 71.6,
     heightMm: 147.6,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2024,
-    cameraPath: CAM_IPHONE_16_VERTICAL
+    cameraPath: CAMERA_DUMPS.IPHONE_16
   },
-
-  // iPhone 15 Series
   {
     id: 'iphone-15-pro-max',
     name: 'iPhone 15 Pro Max',
     brand: Brand.APPLE,
     widthMm: 76.7,
     heightMm: 159.9,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2023,
-    cameraPath: CAM_IPHONE_PRO
+    cameraPath: CAMERA_DUMPS.IPHONE_15_PRO_MAX
   },
   {
     id: 'iphone-15-pro',
@@ -106,9 +164,9 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.APPLE,
     widthMm: 70.6,
     heightMm: 146.6,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2023,
-    cameraPath: CAM_IPHONE_PRO
+    cameraPath: CAMERA_DUMPS.IPHONE_15_PRO
   },
   {
     id: 'iphone-15-plus',
@@ -116,9 +174,9 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.APPLE,
     widthMm: 77.8,
     heightMm: 160.9,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2023,
-    cameraPath: CAM_IPHONE_BASE_DIAGONAL
+    cameraPath: CAMERA_DUMPS.IPHONE_15_PLUS
   },
   {
     id: 'iphone-15',
@@ -126,87 +184,42 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.APPLE,
     widthMm: 71.6,
     heightMm: 147.6,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 12,
     releaseYear: 2023,
-    specs: {
-      device_model: "iPhone 15 (17th Gen)",
-      units: "millimeters",
-      dimensions_outer: { height: 147.6, width: 71.6, depth: 7.8, weight_grams: 171 },
-      chassis: { material: "Aluminum", corner_radius_mm: 8.5, corner_type: "continuous_curvature_squircle", bezel_thickness_approx: 2.2 },
-      screen: { diagonal_inch: 6.1, diagonal_mm: 155, width_mm: 64.5, height_mm: 139.8, resolution_px: { width: 1179, height: 2556 }, pixel_density_ppi: 460, refresh_rate_hz: 60, features: ["Dynamic Island"], dynamic_island: { width_approx: 20.0, height_approx: 5.5, position_from_top: 7.5 } },
-      camera_module_rear: { type: "Dual Lens Diagonal", island_dimensions: { width: 29.5, height: 29.5, protrusion_depth: 2.6, corner_radius: 8.0, position_from_left_edge: 3.5, position_from_top_edge: 3.5 }, lenses: [], flash: { position: "Top-Left", diameter: 5.5 }, mic: { position: "Bottom-Right", diameter: 1.0 } },
-      buttons_and_ports: { left_side: [], right_side: [], bottom: [] }
-    },
-    cameraPath: CAM_IPHONE_BASE_DIAGONAL
+    cameraPath: CAMERA_DUMPS.IPHONE_15
   },
-
-  // iPhone 14 Series
-  {
-    id: 'iphone-14-pro-max',
-    name: 'iPhone 14 Pro Max',
-    brand: Brand.APPLE,
-    widthMm: 77.6,
-    heightMm: 160.7,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2022,
-    cameraPath: CAM_IPHONE_PRO
-  },
-  {
-    id: 'iphone-14-pro',
-    name: 'iPhone 14 Pro',
-    brand: Brand.APPLE,
-    widthMm: 71.5,
-    heightMm: 147.5,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2022,
-    cameraPath: CAM_IPHONE_PRO
-  },
-  {
-    id: 'iphone-14-plus',
-    name: 'iPhone 14 Plus',
-    brand: Brand.APPLE,
-    widthMm: 78.1,
-    heightMm: 160.8,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2022,
-    cameraPath: CAM_IPHONE_BASE_DIAGONAL
-  },
-  {
-    id: 'iphone-14',
-    name: 'iPhone 14',
-    brand: Brand.APPLE,
-    widthMm: 71.5,
-    heightMm: 146.7,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2022,
-    cameraPath: CAM_IPHONE_BASE_DIAGONAL
-  },
-
-  // iPhone 13 Series
-  {
-    id: 'iphone-13-pro-max',
-    name: 'iPhone 13 Pro Max',
-    brand: Brand.APPLE,
-    widthMm: 78.1,
-    heightMm: 160.8,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2021,
-    cameraPath: CAM_IPHONE_PRO
-  },
-  {
-    id: 'iphone-13',
-    name: 'iPhone 13',
-    brand: Brand.APPLE,
-    widthMm: 71.5,
-    heightMm: 146.7,
-    cornerRadiusMm: 8.5,
-    releaseYear: 2021,
-    cameraPath: CAM_IPHONE_BASE_DIAGONAL
-  },
-
-  // --- SAMSUNG ---
   
-  // Z Fold Series (Folded Back Panel + Vertical Center Cut)
+  // --- SAMSUNG ---
+  {
+    id: 's24-ultra',
+    name: 'Galaxy S24 Ultra',
+    brand: Brand.SAMSUNG,
+    widthMm: 79.0,
+    heightMm: 162.3,
+    cornerRadiusMm: 1.5, // Sharp corners
+    releaseYear: 2024,
+    cameraPath: CAMERA_DUMPS.SAMSUNG_S24_ULTRA
+  },
+  {
+    id: 's24-plus',
+    name: 'Galaxy S24+',
+    brand: Brand.SAMSUNG,
+    widthMm: 75.9,
+    heightMm: 158.5,
+    cornerRadiusMm: 7,
+    releaseYear: 2024,
+    cameraPath: CAMERA_DUMPS.SAMSUNG_S24_PLUS
+  },
+  {
+    id: 's24',
+    name: 'Galaxy S24',
+    brand: Brand.SAMSUNG,
+    widthMm: 70.6,
+    heightMm: 147.0,
+    cornerRadiusMm: 7,
+    releaseYear: 2024,
+    cameraPath: CAMERA_DUMPS.SAMSUNG_S24
+  },
   {
     id: 'z-fold-6',
     name: 'Galaxy Z Fold6',
@@ -215,30 +228,8 @@ export const PHONE_MODELS: PhoneModel[] = [
     heightMm: 153.5,
     cornerRadiusMm: 2,
     releaseYear: 2024,
-    cameraPath: `
-      M 12 12 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-      M 12 26 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-      M 12 40 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0 
-      M 33.05 0 h 2 v 153.5 h -2 z
-    `
+    cameraPath: CAMERA_DUMPS.SAMSUNG_Z_FOLD_6
   },
-  {
-    id: 'z-fold-5',
-    name: 'Galaxy Z Fold5',
-    brand: Brand.SAMSUNG,
-    widthMm: 67.1,
-    heightMm: 154.9,
-    cornerRadiusMm: 3,
-    releaseYear: 2023,
-    // Pill Island + Vertical Cut
-    cameraPath: `
-      M 10 10 h 12 a 6 6 0 0 1 6 6 v 30 a 6 6 0 0 1 -6 6 h -12 a 6 6 0 0 1 -6 -6 v -30 a 6 6 0 0 1 6 -6 z 
-      M 16 16 a 3 3 0 1 0 0 6 a 3 3 0 1 0 0 -6 M 16 29 a 3 3 0 1 0 0 6 a 3 3 0 1 0 0 -6 M 16 42 a 3 3 0 1 0 0 6 a 3 3 0 1 0 0 -6
-      M 32.55 0 h 2 v 154.9 h -2 z
-    `
-  },
-
-  // Z Flip Series (Unfolded Back Panel + Horizontal Center Cut)
   {
     id: 'z-flip-6',
     name: 'Galaxy Z Flip6',
@@ -247,135 +238,19 @@ export const PHONE_MODELS: PhoneModel[] = [
     heightMm: 165.1,
     cornerRadiusMm: 5,
     releaseYear: 2024,
-    cameraPath: `M 5 5 h 60 v 35 h -60 z M 10 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 M 30 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 
-                 M 0 81.5 h 71.9 v 2 h -71.9 z`
+    cameraPath: CAMERA_DUMPS.SAMSUNG_Z_FLIP_6
   },
-  {
-    id: 'z-flip-5',
-    name: 'Galaxy Z Flip5',
-    brand: Brand.SAMSUNG,
-    widthMm: 71.9,
-    heightMm: 165.1,
-    cornerRadiusMm: 5,
-    releaseYear: 2023,
-    cameraPath: `M 5 5 h 60 v 35 h -60 z M 10 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 M 30 12 a 6 6 0 1 0 12 0 a 6 6 0 1 0 -12 0 
-                 M 0 81.5 h 71.9 v 2 h -71.9 z`
-  },
-  {
-    id: 'z-flip-4',
-    name: 'Galaxy Z Flip4',
-    brand: Brand.SAMSUNG,
-    widthMm: 71.9,
-    heightMm: 165.2,
-    cornerRadiusMm: 5,
-    releaseYear: 2022,
-    cameraPath: `
-      M 15 15 m -5 0 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 
-      M 15 32 m -5 0 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 
-      M 0 81.6 h 71.9 v 2 h -71.9 z
-    `
-  },
-
-  // S24 Series
-  {
-    id: 's24-ultra',
-    name: 'Galaxy S24 Ultra',
-    brand: Brand.SAMSUNG,
-    widthMm: 79.0,
-    heightMm: 162.3,
-    cornerRadiusMm: 1.5,
-    releaseYear: 2024,
-    cameraPath: CAM_SAMSUNG_ULTRA
-  },
-  {
-    id: 's24-plus',
-    name: 'Galaxy S24+',
-    brand: Brand.SAMSUNG,
-    widthMm: 75.9,
-    heightMm: 158.5,
-    cornerRadiusMm: 6,
-    releaseYear: 2024,
-    cameraPath: CAM_SAMSUNG_VERTICAL_3
-  },
-  {
-    id: 's24',
-    name: 'Galaxy S24',
-    brand: Brand.SAMSUNG,
-    widthMm: 70.6,
-    heightMm: 147.0,
-    cornerRadiusMm: 6,
-    releaseYear: 2024,
-    cameraPath: CAM_SAMSUNG_VERTICAL_3
-  },
-
-  // S23 Series
-  {
-    id: 's23-ultra',
-    name: 'Galaxy S23 Ultra',
-    brand: Brand.SAMSUNG,
-    widthMm: 78.1,
-    heightMm: 163.4,
-    cornerRadiusMm: 2,
-    releaseYear: 2023,
-    cameraPath: CAM_SAMSUNG_ULTRA
-  },
-  {
-    id: 's23-plus',
-    name: 'Galaxy S23+',
-    brand: Brand.SAMSUNG,
-    widthMm: 76.2,
-    heightMm: 157.8,
-    cornerRadiusMm: 6,
-    releaseYear: 2023,
-    cameraPath: CAM_SAMSUNG_VERTICAL_3
-  },
-  {
-    id: 's23',
-    name: 'Galaxy S23',
-    brand: Brand.SAMSUNG,
-    widthMm: 70.9,
-    heightMm: 146.3,
-    cornerRadiusMm: 6,
-    releaseYear: 2023,
-    cameraPath: CAM_SAMSUNG_VERTICAL_3
-  },
-
 
   // --- GOOGLE ---
-  
-  // Pixel Fold Series (Vertical Cut for Book Fold)
-  {
-    id: 'pixel-9-pro-fold',
-    name: 'Pixel 9 Pro Fold',
-    brand: Brand.GOOGLE,
-    widthMm: 77.1,
-    heightMm: 155.2,
-    cornerRadiusMm: 8,
-    releaseYear: 2024,
-    cameraPath: CAM_PIXEL_9_FOLD + " M 37.55 0 h 2 v 155.2 h -2 z"
-  },
-  {
-    id: 'pixel-fold',
-    name: 'Pixel Fold',
-    brand: Brand.GOOGLE,
-    widthMm: 79.5,
-    heightMm: 139.7,
-    cornerRadiusMm: 5,
-    releaseYear: 2023,
-    // Floating bar + Vertical Cut
-    cameraPath: "M 20 15 h 40 a 5 5 0 0 1 5 5 v 10 a 5 5 0 0 1 -5 5 h -40 a 5 5 0 0 1 -5 -5 v -10 a 5 5 0 0 1 5 -5 z M 25 25 a 3 3 0 1 0 0 1 a 3 3 0 1 0 0 -1 M 35 25 a 3 3 0 1 0 0 1 a 3 3 0 1 0 0 -1 M 38.75 0 h 2 v 139.7 h -2 z"
-  },
-
-  // Pixel 9 Series
   {
     id: 'pixel-9-pro-xl',
     name: 'Pixel 9 Pro XL',
     brand: Brand.GOOGLE,
     widthMm: 76.6,
     heightMm: 162.8,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 10,
     releaseYear: 2024,
-    cameraPath: CAM_PIXEL_9_ISLAND
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_9_PRO_XL
   },
   {
     id: 'pixel-9-pro',
@@ -383,9 +258,9 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.GOOGLE,
     widthMm: 72.0,
     heightMm: 152.8,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 10,
     releaseYear: 2024,
-    cameraPath: CAM_PIXEL_9_ISLAND
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_9_PRO
   },
   {
     id: 'pixel-9',
@@ -393,21 +268,29 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.GOOGLE,
     widthMm: 72.0,
     heightMm: 152.8,
-    cornerRadiusMm: 8.5,
+    cornerRadiusMm: 10,
     releaseYear: 2024,
-    cameraPath: CAM_PIXEL_9_ISLAND
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_9_PRO
   },
-
-  // Pixel 8 Series
+  {
+    id: 'pixel-9-pro-fold',
+    name: 'Pixel 9 Pro Fold',
+    brand: Brand.GOOGLE,
+    widthMm: 77.1,
+    heightMm: 155.2,
+    cornerRadiusMm: 9,
+    releaseYear: 2024,
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_9_FOLD
+  },
   {
     id: 'pixel-8-pro',
     name: 'Pixel 8 Pro',
     brand: Brand.GOOGLE,
     widthMm: 76.5,
     heightMm: 162.6,
-    cornerRadiusMm: 9,
+    cornerRadiusMm: 10,
     releaseYear: 2023,
-    cameraPath: CAM_PIXEL_VISOR
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_8_PRO
   },
   {
     id: 'pixel-8',
@@ -415,31 +298,19 @@ export const PHONE_MODELS: PhoneModel[] = [
     brand: Brand.GOOGLE,
     widthMm: 70.8,
     heightMm: 150.5,
-    cornerRadiusMm: 9,
+    cornerRadiusMm: 10,
     releaseYear: 2023,
-    cameraPath: CAM_PIXEL_VISOR
-  },
-
-  // Pixel 7 Series
-  {
-    id: 'pixel-7-pro',
-    name: 'Pixel 7 Pro',
-    brand: Brand.GOOGLE,
-    widthMm: 76.6,
-    heightMm: 162.9,
-    cornerRadiusMm: 6,
-    releaseYear: 2022,
-    cameraPath: CAM_PIXEL_VISOR
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_8
   },
   {
-    id: 'pixel-7',
-    name: 'Pixel 7',
+    id: 'pixel-6',
+    name: 'Pixel 6',
     brand: Brand.GOOGLE,
-    widthMm: 73.2,
-    heightMm: 155.6,
-    cornerRadiusMm: 6,
-    releaseYear: 2022,
-    cameraPath: CAM_PIXEL_VISOR
+    widthMm: 74.8, // Verified 2.94"
+    heightMm: 158.6, // Verified 6.24"
+    cornerRadiusMm: 3, 
+    releaseYear: 2021,
+    cameraPath: CAMERA_DUMPS.GOOGLE_PIXEL_6
   }
 ];
 

@@ -9,17 +9,24 @@ import { AlertTriangle } from 'lucide-react';
 const App: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<PhoneModel | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleHomeRequest = () => {
     // If we are already on home screen, do nothing or maybe refresh?
     if (!selectedModel) return;
     
-    // Show custom modal instead of native confirm which can get stuck
-    setShowExitConfirm(true);
+    // Only show confirmation if user has made changes (e.g. uploaded an image)
+    if (isDirty) {
+      setShowExitConfirm(true);
+    } else {
+      setSelectedModel(null);
+      setIsDirty(false);
+    }
   };
 
   const confirmExit = () => {
     setSelectedModel(null);
+    setIsDirty(false);
     setShowExitConfirm(false);
   };
 
@@ -39,6 +46,7 @@ const App: React.FC = () => {
             <ImageCustomizer 
               model={selectedModel} 
               onBack={handleHomeRequest} 
+              onDirtyChange={setIsDirty}
             />
           )}
         </main>
